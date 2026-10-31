@@ -15,3 +15,11 @@ name: A till restarted while showing a QR opens straight on that order, and back
 - back
 - assertVisible:
     id: "order-qr"
+# iOS has no back button but pops screens with a swipe from the left edge.
+- swipe:
+    start: 0%, 50%
+    end: 80%, 50%
+    duration: 400
+- waitForAnimationToEnd
+- assertVisible:
+    id: "order-qr"
