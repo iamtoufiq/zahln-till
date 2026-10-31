@@ -1,4 +1,5 @@
 import apiInstance, { type ApiResult } from "@/api/api-instance";
+import type { RequestInit } from "@/api/client";
 import { ENDPOINTS } from "@/api/endpoints";
 
 import type { Order, OrderLineInput } from "./interface";
@@ -10,5 +11,8 @@ import type { Order, OrderLineInput } from "./interface";
 export const createOrder = (items: OrderLineInput[], key: string): Promise<ApiResult<Order>> =>
   apiInstance.request<Order>("POST", ENDPOINTS.ORDERS, { body: { items }, idempotencyKey: key });
 
-export const getOrder = async (orderId: string): Promise<Order> =>
-  (await apiInstance.request<Order>("GET", ENDPOINTS.ORDER(orderId))).data;
+export const getOrder = async (
+  orderId: string,
+  retry?: Pick<RequestInit, "maxAttempts" | "timeoutMs">,
+): Promise<Order> =>
+  (await apiInstance.request<Order>("GET", ENDPOINTS.ORDER(orderId), retry)).data;

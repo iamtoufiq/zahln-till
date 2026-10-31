@@ -210,4 +210,48 @@ describe("createClient", () => {
     ).rejects.toMatchObject({ outcome: "unknown" });
     expect(calls).toHaveLength(4);
   });
+
+  test("a request can ask for a single attempt", async () => {
+    const { client, calls } = setup(["throw", { status: 200, body: { ok: true } }]);
+    await expect(client.request("GET", "/config", { maxAttempts: 1 })).rejects.toMatchObject({
+      code: "network",
+    });
+    expect(calls).toHaveLength(1);
+  });
+
+  test("a request can set its own timeout", async () => {
+    vi.useFakeTimers();
+    try {
+      const signals: AbortSignal[] = [];
+      const hang = vi.fn(
+        (_url: string, init: RequestInit) =>
+          new Promise<Response>((_, reject) => {
+            const signal = init.signal as AbortSignal;
+            signals.push(signal);
+            signal.addEventListener("abort", () =>
+              reject(new DOMException("Aborted", "AbortError")),
+            );
+          }),
+      );
+      const session = createSession(vi.fn(async () => ({ accessToken: "fresh" }) as Session));
+      session.set({ accessToken: "old" } as Session);
+      const client = createClient({
+        baseUrl: "https://api.test",
+        candidateId: "c_test",
+        session,
+        clock: createServerClock(),
+        fetch: hang as unknown as typeof globalThis.fetch,
+        retryDelayMs: () => 0,
+      });
+      const result = expect(
+        client.request("GET", "/config", { maxAttempts: 1, timeoutMs: 5000 }),
+      ).rejects.toMatchObject({ code: "timeout" });
+      await vi.advanceTimersByTimeAsync(4999);
+      expect(signals[0].aborted).toBe(false);
+      await vi.advanceTimersByTimeAsync(1);
+      await result;
+    } finally {
+      vi.useRealTimers();
+    }
+  });
 });

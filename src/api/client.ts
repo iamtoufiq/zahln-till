@@ -11,6 +11,8 @@ export type RequestInit = {
   idempotencyKey?: string;
   sendAppVersion?: boolean;
   anonymous?: boolean;
+  maxAttempts?: number;
+  timeoutMs?: number;
 };
 
 export type ApiResult<T> = { data: T; replayed: boolean };
@@ -76,7 +78,7 @@ export function createClient(options: ClientOptions) {
 
   async function send<T>(method: Method, path: string, init: RequestInit): Promise<ApiResult<T>> {
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    const timer = setTimeout(() => controller.abort(), init.timeoutMs ?? timeoutMs);
     let res: Response;
     try {
       res = await doFetch(buildUrl(baseUrl, path, init.query), {
@@ -118,7 +120,7 @@ export function createClient(options: ClientOptions) {
           continue;
         }
         const retryable = canRetry && error.outcome !== "rejected" && error.retryable;
-        if (!retryable || attempt + 1 >= maxAttempts) {
+        if (!retryable || attempt + 1 >= (init.maxAttempts ?? maxAttempts)) {
           throw answerLost && init.idempotencyKey ? error.asUnknown() : error;
         }
         await sleep(retryDelayMs(attempt));

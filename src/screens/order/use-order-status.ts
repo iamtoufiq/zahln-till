@@ -24,6 +24,8 @@ import {
 } from "./order-status";
 
 const POLL_MS = 1500;
+// The loop already asks again every POLL_MS, so a poll tries once; client retries would hold the offline note back for minutes.
+const POLL_REQUEST = { maxAttempts: 1, timeoutMs: 5000 };
 const TICK_MS = 1000;
 const PAYMENT_RETRY_MAX_MS = 10_000;
 
@@ -63,7 +65,7 @@ export function useOrderStatus(orderId: string) {
       while (live) {
         try {
           const held = heldRef.current;
-          const next = reduceOrder(held, await getOrder(orderId));
+          const next = reduceOrder(held, await getOrder(orderId, POLL_REQUEST));
           if (live) setFailedPolls(0);
           // An unchanged order changes nothing on screen, so it skips the render and the write.
           if (live && changedOrder(held, next)) {
