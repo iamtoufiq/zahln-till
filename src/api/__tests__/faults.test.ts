@@ -64,4 +64,13 @@ describe("createFaultyFetch", () => {
     const res = await faulty("https://x/orders/o1", { method: "GET" });
     expect(await res.json()).toEqual({ n: 1 });
   });
+
+  // Like a phone with no signal: nothing reaches the server, reads included.
+  test("offline fails every request without sending it", async () => {
+    const real = realFetch();
+    const faulty = createFaultyFetch(real as unknown as typeof fetch, () => "offline");
+    await expect(faulty("https://x/orders/o1", { method: "GET" })).rejects.toThrow(TypeError);
+    await expect(faulty("https://x/orders", { method: "POST" })).rejects.toThrow(TypeError);
+    expect(real).not.toHaveBeenCalled();
+  });
 });

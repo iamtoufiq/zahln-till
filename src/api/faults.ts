@@ -1,6 +1,13 @@
-export type FaultMode = "off" | "slow" | "fail_503" | "lose_response" | "stale";
+export type FaultMode = "off" | "slow" | "fail_503" | "lose_response" | "stale" | "offline";
 
-export const FAULT_MODES: FaultMode[] = ["off", "slow", "fail_503", "lose_response", "stale"];
+export const FAULT_MODES: FaultMode[] = [
+  "off",
+  "slow",
+  "fail_503",
+  "lose_response",
+  "stale",
+  "offline",
+];
 
 const SLOW_MS = 4000;
 const unavailable = () =>
@@ -19,6 +26,8 @@ export function createFaultyFetch(real: typeof fetch, mode: () => FaultMode): ty
     const isGet = (init?.method ?? "GET") === "GET";
     const current = mode();
 
+    // No signal: the request never leaves the phone, the same error fetch gives offline.
+    if (current === "offline") throw new TypeError("Network request failed");
     if (current === "fail_503" && !isGet) return unavailable();
     if (current === "stale" && isGet) {
       const old = firstSeen.get(url);
