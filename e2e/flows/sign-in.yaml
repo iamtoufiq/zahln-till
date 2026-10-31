@@ -1,0 +1,14 @@
+appId: de.zahln.till
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      id: "pick-cashier-campus-1"
+    timeout: 120000
+- tapOn:
+    id: "pick-cashier-campus-1"
+- extendedWaitUntil:
+    visible:
+      id: "menu-item_campus_pasta"
+    timeout: 60000

@@ -1,0 +1,23 @@
+appId: de.zahln.till
+name: The till loses the network while showing a QR and still sees the payment once it is back
+---
+- runFlow: flows/sign-in.yaml
+- runFlow: flows/ring-up.yaml
+- setAirplaneMode: enabled
+- runScript:
+    file: scripts/api.js
+    env:
+      ACTION: pay_as
+      PAYER: student
+      ORDER_ID: ${output.orderId}
+- assertNotVisible:
+    id: "order-paid"
+- setAirplaneMode: disabled
+- extendedWaitUntil:
+    visible:
+      id: "order-paid"
+    timeout: 120000
+# The amount comes from a second request, so it can land a moment after "Paid".
+- extendedWaitUntil:
+    visible: "€4.00 · Student price"
+    timeout: 30000

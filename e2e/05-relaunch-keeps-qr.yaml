@@ -1,0 +1,17 @@
+appId: de.zahln.till
+name: A till restarted while showing a QR opens straight on that order, and back does not abandon it
+---
+- runFlow: flows/sign-in.yaml
+- runFlow: flows/ring-up.yaml
+- stopApp
+- launchApp:
+    clearState: false
+- assertVisible:
+    id: "order-qr"
+- copyTextFrom:
+    id: "order-id"
+- assertTrue: ${maestro.copiedText == output.orderId}
+# The API cannot cancel an order, so back must not leave an open QR behind.
+- back
+- assertVisible:
+    id: "order-qr"

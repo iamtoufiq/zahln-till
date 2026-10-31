@@ -1,0 +1,21 @@
+appId: de.zahln.till
+name: Ring up an order, show its QR without a price, and see the payment arrive
+---
+- runFlow: flows/sign-in.yaml
+- runFlow: flows/ring-up.yaml
+- assertNotVisible: "€4.00"
+- assertNotVisible: "€6.80"
+- runScript:
+    file: scripts/api.js
+    env:
+      ACTION: pay_as
+      PAYER: staff
+      ORDER_ID: ${output.orderId}
+- extendedWaitUntil:
+    visible:
+      id: "order-paid"
+    timeout: 120000
+# The amount comes from a second request, so it can land a moment after "Paid".
+- extendedWaitUntil:
+    visible: "€6.80 · Staff price"
+    timeout: 30000

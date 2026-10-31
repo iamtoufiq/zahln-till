@@ -1,0 +1,45 @@
+appId: de.zahln.till
+name: Refund part of a payment, then get a clear error for too much
+---
+- runFlow: flows/sign-in.yaml
+- runFlow: flows/ring-up.yaml
+- runScript:
+    file: scripts/api.js
+    env:
+      ACTION: pay_as
+      PAYER: guest
+      ORDER_ID: ${output.orderId}
+- extendedWaitUntil:
+    visible:
+      id: "order-paid"
+    timeout: 120000
+- tapOn:
+    id: "new-order"
+- tapOn:
+    id: "payments"
+- extendedWaitUntil:
+    visible:
+      id: "payment-${output.orderId}"
+    timeout: 60000
+- tapOn:
+    id: "payment-${output.orderId}"
+- extendedWaitUntil:
+    visible:
+      id: "refund-amount"
+    timeout: 60000
+- tapOn:
+    id: "refund-amount"
+- inputText: "1.00"
+- pressKey: Enter
+- tapOn:
+    id: "refund-submit"
+- extendedWaitUntil:
+    visible: "Refunded €1.00"
+    timeout: 90000
+- tapOn:
+    id: "refund-amount"
+- inputText: "50"
+- pressKey: Enter
+- tapOn:
+    id: "refund-submit"
+- assertVisible: "That is more than can still be refunded."

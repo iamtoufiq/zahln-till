@@ -1,0 +1,24 @@
+appId: de.zahln.till
+---
+- tapOn:
+    id: "menu-item_campus_pasta"
+- scrollUntilVisible:
+    element:
+      id: "menu-item_campus_salad"
+    direction: DOWN
+- tapOn:
+    id: "menu-item_campus_salad"
+- scrollUntilVisible:
+    element:
+      id: "charge"
+    direction: DOWN
+    centerElement: true
+- tapOn:
+    id: "charge"
+- extendedWaitUntil:
+    visible:
+      id: "order-qr"
+    timeout: 90000
+- copyTextFrom:
+    id: "order-id"
+- evalScript: ${output.orderId = maestro.copiedText}

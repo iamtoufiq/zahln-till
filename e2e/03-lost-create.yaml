@@ -1,0 +1,10 @@
+appId: de.zahln.till
+name: A lost create-order response is retried with the same key and still shows the QR
+# The API has no way to list a till's orders, so a second order cannot be counted from here.
+# The key reuse itself is covered by the order-intent unit tests.
+---
+- runFlow: flows/sign-in.yaml
+- openLink: "zahln-till://dev/faults?mode=lose_response"
+- runFlow: flows/ring-up.yaml
+- assertVisible: "Scan to pay"
+- openLink: "zahln-till://dev/faults?mode=off"
