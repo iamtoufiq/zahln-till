@@ -102,7 +102,7 @@ The till polls `GET /orders/{id}` every 1.5 s, keeps the highest version, and sh
 
 ### How this is tested
 
-- **Unit (Vitest):** 113 tests in the student app, 113 in the till, 81 in the dashboard. The client tests script `504, 502, 201` and assert three calls with the same key; the intent tests simulate a relaunch over the same storage; the state machine tests cover stale polls, expiry during biometrics and every refusal code.
+- **Unit (Vitest):** 113 tests in the student app, 116 in the till, 81 in the dashboard. The client tests script `504, 502, 201` and assert three calls with the same key; the intent tests simulate a relaunch over the same storage; the state machine tests cover stale polls, expiry during biometrics and every refusal code.
 - **End to end (Maestro, against the real mock):** pay, each price group, lost response, app killed mid-payment, double tap, network lost while confirming (airplane mode), server answering 503 to every payment request, German; till ring-up to paid, refunds, lost create, network lost while showing the QR, till restarted while showing the QR. Each payment flow asks the server afterwards that exactly one payment exists for the order.
 - **Release builds:** every flow that needs no dev fault switch also runs against the release APKs.
 - **Dashboard (Playwright):** going offline and back, sign in, totals, attention list, search, payment history, CSV download (header and rows checked), German, reload.

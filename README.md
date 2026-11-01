@@ -11,11 +11,25 @@ Requirements: Node 22, Android Studio with a tablet or phone emulator (the app r
 ```bash
 npm install
 cp .env.example .env   # API base URL and candidate id
-npm run android
-npm run ios
+npm run android        # Android: builds and installs a dev build, starts Metro
+npm run ios            # iPad simulator: the same, needs Xcode
 ```
 
 Pick a cashier on the first screen. Each cashier works at one till and sees that mensa's menu.
+
+### Running the student app and the till together
+
+Each app starts its own Metro bundler, and both use port 8081 by default. Start the second one on another port:
+
+```bash
+# terminal 1, in zahln-till
+npm run android                    # Metro on 8081
+
+# terminal 2, in zahln-student
+npm run android -- --port 8082     # Metro on 8082
+```
+
+The same works for iOS (`npm run ios -- --port 8082`). Once a dev build is installed, `npx expo start --port 8082` only starts Metro.
 
 ## Test
 
@@ -48,7 +62,7 @@ Expo SDK 58 with Expo Router, TanStack Query, Zustand, react-native-mmkv for ord
 
 ## Tools
 
-I made the architecture and design decisions. Claude Code was used as a coding assistant during implementation. All flows were tested on an Android emulator against the mock API.
+I made the architecture and design decisions. Claude Code was used as a coding assistant during implementation. All flows were tested on an Android emulator, an iPad simulator and a low-end Android phone against the mock API.
 
 ## Test logins
 
